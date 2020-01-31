@@ -10,7 +10,13 @@ How to:
 
 3°) edit add_anyconnect_group.j2 and add_ACL.j2 according to your standard
 
-4°) run it: ansible-playbook playbook1.yml
+4°) add a way to share the created account password to the user in tasks.yml (mail or sms gateway)
+
+5°) run it: ansible-playbook playbook1.yml
 
 
-This is idempotent. 
+This is idempotent: added user or ressource will be commited. Change to IP pool will be commited.
+
+Missing features:
+- removing user if no more present in .yml
+- removing ressource if not more present in .yml
