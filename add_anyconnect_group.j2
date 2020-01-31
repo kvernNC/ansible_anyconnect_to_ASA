@@ -1,0 +1,10 @@
+time-range tr_{{current.group_name}}
+ absolute start {{current.time_range.start}} end {{current.time_range.stop}}
+ip local pool ap_{{current.group_name}} {{current.pool_start}}{%if current.pool_end is defined and current.pool_end.0 is defined%}-{{current.pool_end}}{%endif%} mask {{current.pool_mask}}
+group-policy p_{{current.group_name}} internal
+group-policy p_{{current.group_name}} attributes
+ vpn-access-hours value tr_{{current.group_name}}
+ address-pools value ap_{{current.group_name}}
+ split-tunnel-policy tunnelspecified
+ split-tunnel-network-list value spacl_{{current.group_name}}
+ split-tunnel-all-dns disable

@@ -1,0 +1,2 @@
+[gns3-asa]
+ASA ansible_host="10.248.31.0" ansible_user="admin" ansible_ssh_pass="cisco" ansible_network_os="asa" ansible_become_password="cisco"

@@ -1,0 +1,71 @@
+---
+
+  - name: get running user database
+    asa_command:
+      commands:
+        - show running-config user | include password
+    register: show_run_user_result
+
+  - name: convert result to a simple list
+    set_fact:
+      local_user: "{{(local_user| default([])) + [item.split(' ').1] }}"
+    loop: "{{show_run_user_result.stdout_lines.0}}"
+
+  - name: build a list with all the user to create and a temporary password for each
+    set_fact:
+      user_to_create: "{{(user_to_create|default({}))| combine ({item.name : lookup('password', '/dev/null chars=ascii_letters,digits,hexdigits,punctuation length=15') } )}}"
+    loop: "{{current.users}}"
+    when: item.name not in local_user and (item.password_hash is not defined or (item.password_hash is defined and item.password_hash.0 is not defined))
+
+  - name: build a list with all the user to import with their hashed password
+    set_fact:
+      user_to_import: "{{(user_to_import|default({}))| combine ({item.name : item.password_hash } )}}"
+    loop: "{{current.users}}"
+    when: item.name not in local_user and item.password_hash is defined and item.password_hash.0 is defined
+
+  - name: Create the missing user account
+    asa_config:
+      src: "add_user.j2"
+    loop: "{{user_to_create|default({})|dict2items}}"
+    when: user_to_create is defined
+
+  - name: import user account
+    asa_config:
+      src: "import_user.j2"
+    loop: "{{user_to_import|default({})|dict2items}}"
+    when: user_to_import is defined
+
+  - name: share the password with the created users
+    debug:
+      msg: "Hello, here is your login {{item.name}} and your password {{user_to_add[item.name]}}, this will be send to your mail: {{item.mail_address}} and your phone {{item.cell_number}}"
+    loop: "{{current.users}}"
+    when: user_to_create is defined and item.name in user_to_add.keys()
+
+  - name: Create needed objects
+    asa_config:
+      lines:
+        - "host {{((lookup('dig', item).split(','))|sort).0}}"
+      parents: ['object network {{item}}']
+    loop: "{{current.ressources}}"
+
+  - name: add all needed objects to an objects-group
+    asa_config:
+      lines:
+        - "network-object object {{item}}"
+      parents: ['object-group network rp_{{current.group_name}}']
+    loop: "{{current.ressources}}"
+
+  - name: add all needed objects to a standard acl
+    asa_config:
+      lines:
+        - "access-list spacl_{{current.group_name}} remark {{item}}"
+        - "access-list spacl_{{current.group_name}} standard permit host {{((lookup('dig', item).split(','))|sort).0}}"
+    loop: "{{current.ressources}}"
+
+  - name: Create the anyconnect group
+    asa_config:
+      src: "add_anyconnect_group.j2"
+
+  - name: enable allow access-list for the objects-group
+    asa_config:
+      src: "add_ACL.j2"

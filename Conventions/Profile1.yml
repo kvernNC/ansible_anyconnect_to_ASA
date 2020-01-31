@@ -1,0 +1,26 @@
+---
+"Profile1":
+  group_name: Partner1
+
+  pool_start: 192.168.100.0
+  pool_end: 192.168.100.255                                                                # can be empty if pool_mask = /32
+  pool_mask: 255.255.255.0
+
+  time_range:
+    start: "00:00 01 December 2019"
+    stop: "23:59 01 April 2020"
+
+  users:
+  - name: kevin
+    password_hash: "$sha512$5000$qFZDJtSpWgZTNTwCWtvwKA==$/4IhFxN/7oNSYh5jqcnRmA== pbkdf2"  # need to contain the type of encryption
+    cell_number: +123456789
+    mail_address: kevin@acme
+  - name: Vincent
+    cell_number: +987654321
+    mail_address: vincent@acme
+
+
+  ressources:
+    - www.acme.com
+    - www.github.com
+    - www.facebook.com

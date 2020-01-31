@@ -1,0 +1,11 @@
+! define a source object
+object network ap_{{current.group_name}}
+{%if current.pool_end is defined and current.pool_end.0 is defined%}
+ range {{current.pool_start}} {{current.pool_end}}
+{%else%}
+ host {{current.pool_start}}
+{%endif%}
+
+
+access-list generated_by_ansible remark convention {{task_item.key}}
+access-list generated_by_ansible extended permit ip object ap_{{current.group_name}} object-group rp_{{current.group_name}}

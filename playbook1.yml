@@ -1,0 +1,24 @@
+---
+- name: testing asa playbook
+  hosts: ASA
+  gather_facts: false
+  connection: network_cli
+  become: yes
+  become_method: enable
+
+  tasks:
+  - include_vars:
+      dir: ./Conventions
+      extensions:
+        - yml
+        - yaml
+      name: conventions
+
+  - name: proceed each conventions file
+    include_tasks:
+      file: tasks.yml
+    loop: "{{conventions|dict2items}}"
+    vars:
+      current: "{{conventions[task_item.key]}}"
+    loop_control:
+      loop_var: task_item

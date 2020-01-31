@@ -1,0 +1,20 @@
+---
+"Profile2":
+  group_name: customer1
+
+  pool_start: 192.168.101.10
+  pool_end:                                                            # can be empty if pool_mask = /32
+  pool_mask: 255.255.255.255
+
+  time_range:
+    start: "00:00 01 December 2019"
+    stop: "23:59 01 April 2020"
+
+  users:
+  - name: thomas
+    password_hash:   # need to contain the type of encryption
+    cell_number: +123456789
+    mail_address: thomas@acme
+
+  ressources:
+    - www.yahoo.com
